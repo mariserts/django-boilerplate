@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+
+    postgres:
+        container_name: postgres_container
+        image: postgres
+        environment:
+            POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+            PGDATA: /data/postgres
+        volumes:
+            - postgres:/data/postgres
+        ports:
+            - "5432:5432"
+        networks:
+            - postgres
+        restart: unless-stopped
+
+    demo:
+        container_name: demo_app
+        build:
+            dockerfile: Dockerfile
+        depends_on:
+            - postgres
+        environment:
+            - ALLOWED_HOSTS: '*'
+            - DEGUB: 1
+            - POSTGRES_DB_NAME: 'changeme'
+            - POSTGRES_USER: ${POSTGRES_USER:-postgres}
+            - POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+            - POSTGRES_HOSTNAME: postgres
+            - POSTGRES_PORT: 5432
+            - USE_POSTGRES: 1
+            - SECRET_KEY: changeme
+        ports:
+            - "8000:8000"
+
+networks:
+    default:
+        driver: bridge
